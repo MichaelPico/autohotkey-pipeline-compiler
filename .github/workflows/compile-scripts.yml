@@ -33,11 +33,21 @@ jobs:
           Expand-Archive -Path "$cwd\autohotkey.zip" -DestinationPath "$cwd\_autohotkey\" -Force
           Remove-Item -Path "$cwd\autohotkey.zip" -Force
 
+          Write-Host "Checking extracted files..."
+          Get-ChildItem -Path "$cwd\_autohotkey\" -Recurse | Select-Object FullName | Format-Table -AutoSize
+
           Write-Host "Setting up environment paths..."
           Write-Output ("$cwd\_autohotkey\;" + "$cwd\_autohotkey\Compiler") | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
           Write-Host "Configuring compiler..."
-          Copy-Item -Path "$cwd\_autohotkey\Compiler\Unicode 32-bit.bin" -Destination "$cwd\_autohotkey\Compiler\AutoHotkeySC.bin"
+          # Check if the bin file exists, if not, look for alternatives
+          $binFile = Get-ChildItem -Path "$cwd\_autohotkey\" -Filter "*.bin" -Recurse | Select-Object -First 1
+          if ($binFile) {
+            Write-Host "Found bin file: $($binFile.FullName)"
+            Copy-Item -Path $binFile.FullName -Destination "$cwd\_autohotkey\Compiler\AutoHotkeySC.bin" -Force
+          } else {
+            Write-Host "No .bin file found, compiler will use default"
+          }
 
           Write-Host "AutoHotkey setup complete!"
 
