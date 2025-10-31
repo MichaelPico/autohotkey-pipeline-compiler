@@ -19,46 +19,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup AutoHotkey
-        run: |
-          # Download AutoHotkey v2 installer
-          Invoke-WebRequest -Uri "https://www.autohotkey.com/download/ahk-v2.zip" -OutFile "ahk-v2.zip"
-          Expand-Archive -Path "ahk-v2.zip" -DestinationPath "ahk-v2"
-
-          # Download Ahk2Exe compiler
-          Invoke-WebRequest -Uri "https://www.autohotkey.com/download/2.0/Ahk2Exe.zip" -OutFile "Ahk2Exe.zip"
-          Expand-Archive -Path "Ahk2Exe.zip" -DestinationPath "Ahk2Exe"
-        shell: powershell
-
-      - name: Create output directory
-        run: mkdir compiled-scripts
-        shell: powershell
-
-      - name: Compile all scripts
-        run: |
-          $compiler = "Ahk2Exe\Ahk2Exe.exe"
-          $ahkBase = "ahk-v2\AutoHotkey64.exe"
-
-          # Get all .ahk files in source-scripts
-          $scripts = Get-ChildItem -Path "source-scripts" -Filter "*.ahk" -Recurse
-
-          foreach ($script in $scripts) {
-            $scriptName = $script.BaseName
-            $outputExe = "compiled-scripts\$scriptName.exe"
-
-            Write-Host "Compiling $($script.Name) to $outputExe"
-
-            & $compiler /in $script.FullName /out $outputExe /base $ahkBase
-
-            if ($LASTEXITCODE -ne 0) {
-              Write-Error "Failed to compile $($script.Name)"
-              exit 1
-            }
-          }
-
-          Write-Host "`nCompilation complete!"
-          Get-ChildItem -Path "compiled-scripts"
-        shell: powershell
+      - name: Compile AutoHotkey scripts
+        uses: nekromoff/ahk2exe@v1
+        with:
+          in: source-scripts
+          out: compiled-scripts
 
       - name: Upload compiled scripts
         uses: actions/upload-artifact@v4
