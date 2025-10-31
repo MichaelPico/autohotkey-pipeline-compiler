@@ -19,37 +19,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install AutoHotkey
+      - name: Install AutoHotkey via Chocolatey
         shell: pwsh
         run: |
-          $cwd = (Get-Item .).FullName
-          $ahkVersion = "2.0.18"
-          $downloadUrl = "https://github.com/AutoHotkey/AutoHotkey/releases/download/v$ahkVersion/AutoHotkey_$ahkVersion.zip"
+          Write-Host "Installing AutoHotkey v2 via Chocolatey..."
+          choco install autohotkey -y
 
-          Write-Host "Downloading AutoHotkey v$ahkVersion from GitHub..."
-          Invoke-WebRequest -Uri $downloadUrl -OutFile "$cwd\autohotkey.zip" -UserAgent "Mozilla/5.0"
-
-          Write-Host "Extracting AutoHotkey..."
-          Expand-Archive -Path "$cwd\autohotkey.zip" -DestinationPath "$cwd\_autohotkey\" -Force
-          Remove-Item -Path "$cwd\autohotkey.zip" -Force
-
-          Write-Host "Checking extracted files..."
-          Get-ChildItem -Path "$cwd\_autohotkey\" -Recurse | Select-Object FullName | Format-Table -AutoSize
-
-          Write-Host "Setting up environment paths..."
-          Write-Output ("$cwd\_autohotkey\;" + "$cwd\_autohotkey\Compiler") | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-
-          Write-Host "Configuring compiler..."
-          # Check if the bin file exists, if not, look for alternatives
-          $binFile = Get-ChildItem -Path "$cwd\_autohotkey\" -Filter "*.bin" -Recurse | Select-Object -First 1
-          if ($binFile) {
-            Write-Host "Found bin file: $($binFile.FullName)"
-            Copy-Item -Path $binFile.FullName -Destination "$cwd\_autohotkey\Compiler\AutoHotkeySC.bin" -Force
-          } else {
-            Write-Host "No .bin file found, compiler will use default"
-          }
-
-          Write-Host "AutoHotkey setup complete!"
+          Write-Host "AutoHotkey installation complete!"
+          Write-Host "Checking installation..."
+          Get-Command ahk2exe.exe -ErrorAction SilentlyContinue | Select-Object Source
 
       - name: Create output directory
         run: New-Item -ItemType Directory -Force -Path compiled-scripts
