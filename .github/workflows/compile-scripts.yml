@@ -23,11 +23,23 @@ jobs:
         shell: pwsh
         run: |
           $cwd = (Get-Item .).FullName
-          Invoke-WebRequest "https://www.autohotkey.com/download/ahk.zip" -OutFile "$cwd\autohotkey.zip"
+          $ahkVersion = "2.0.18"
+          $downloadUrl = "https://github.com/AutoHotkey/AutoHotkey/releases/download/v$ahkVersion/AutoHotkey_$ahkVersion.zip"
+
+          Write-Host "Downloading AutoHotkey v$ahkVersion from GitHub..."
+          Invoke-WebRequest -Uri $downloadUrl -OutFile "$cwd\autohotkey.zip" -UserAgent "Mozilla/5.0"
+
+          Write-Host "Extracting AutoHotkey..."
           Expand-Archive -Path "$cwd\autohotkey.zip" -DestinationPath "$cwd\_autohotkey\" -Force
           Remove-Item -Path "$cwd\autohotkey.zip" -Force
+
+          Write-Host "Setting up environment paths..."
           Write-Output ("$cwd\_autohotkey\;" + "$cwd\_autohotkey\Compiler") | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+          Write-Host "Configuring compiler..."
           Copy-Item -Path "$cwd\_autohotkey\Compiler\Unicode 32-bit.bin" -Destination "$cwd\_autohotkey\Compiler\AutoHotkeySC.bin"
+
+          Write-Host "AutoHotkey setup complete!"
 
       - name: Create output directory
         run: New-Item -ItemType Directory -Force -Path compiled-scripts
