@@ -93,13 +93,23 @@ jobs:
 
           Write-Host "Found $($scripts.Count) script(s) to compile`n"
 
+          # Specify the base file for v2 compilation (64-bit)
+          $baseFile = "C:\Program Files\AutoHotkey\v2\AutoHotkey64.exe"
+
+          if (-not (Test-Path $baseFile)) {
+            Write-Error "Base file not found: $baseFile"
+            exit 1
+          }
+
+          Write-Host "Using base file: $baseFile`n"
+
           foreach ($script in $scripts) {
             $scriptName = $script.BaseName
             $outputExe = "compiled-scripts\$scriptName.exe"
 
             Write-Host "Compiling $($script.Name)..."
 
-            & ahk2exe.exe /silent verbose /in $script.FullName /out $outputExe
+            & ahk2exe.exe /silent verbose /in $script.FullName /out $outputExe /base $baseFile
 
             if ($LASTEXITCODE -ne 0) {
               Write-Error "Failed to compile $($script.Name)"
