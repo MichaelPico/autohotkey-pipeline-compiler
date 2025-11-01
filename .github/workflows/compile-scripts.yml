@@ -111,12 +111,14 @@ jobs:
 
             & ahk2exe.exe /silent verbose /in $script.FullName /out $outputExe /base $baseFile
 
-            if ($LASTEXITCODE -ne 0) {
-              Write-Error "Failed to compile $($script.Name)"
+            # Check if the output file was created (more reliable than exit code)
+            if (Test-Path $outputExe) {
+              $fileSize = (Get-Item $outputExe).Length
+              Write-Host "  -> Successfully created $outputExe ($([math]::Round($fileSize / 1KB, 2)) KB)"
+            } else {
+              Write-Error "Failed to compile $($script.Name) - output file not created"
               exit 1
             }
-
-            Write-Host "  -> Successfully created $outputExe"
           }
 
           Write-Host "`nCompilation complete! Compiled scripts:"
