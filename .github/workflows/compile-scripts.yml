@@ -105,18 +105,24 @@ jobs:
 
           foreach ($script in $scripts) {
             $scriptName = $script.BaseName
-            $outputExe = "compiled-scripts\$scriptName.exe"
+            $outputExe = Join-Path (Get-Location) "compiled-scripts\$scriptName.exe"
 
             Write-Host "Compiling $($script.Name)..."
+            Write-Host "  Output path: $outputExe"
 
             & ahk2exe.exe /silent verbose /in $script.FullName /out $outputExe /base $baseFile
+
+            # Wait a moment for file to be written
+            Start-Sleep -Milliseconds 500
 
             # Check if the output file was created (more reliable than exit code)
             if (Test-Path $outputExe) {
               $fileSize = (Get-Item $outputExe).Length
               Write-Host "  -> Successfully created $outputExe ($([math]::Round($fileSize / 1KB, 2)) KB)"
             } else {
-              Write-Error "Failed to compile $($script.Name) - output file not created"
+              Write-Error "Failed to compile $($script.Name) - output file not created at $outputExe"
+              Write-Host "Checking compiled-scripts directory contents:"
+              Get-ChildItem "compiled-scripts" -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "  - $($_.FullName)" }
               exit 1
             }
           }
