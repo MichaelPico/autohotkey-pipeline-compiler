@@ -11,7 +11,6 @@ $Space::
     global spacePressed, hjklPressed
     spacePressed := true
     hjklPressed := false
-    return
 }
 
 ; When Space is released
@@ -22,11 +21,10 @@ $Space Up::
 
     ; If hjkl was not pressed while space was held, send a space
     if (!hjklPressed) {
-        Send {Space}
+        Send "{Space}"
     }
 
     hjklPressed := false
-    return
 }
 
 ; h = Left arrow (when space is held)
@@ -35,11 +33,10 @@ $h::
     global spacePressed, hjklPressed
     if (spacePressed) {
         hjklPressed := true
-        Send {Left}
+        Send "{Left}"
     } else {
-        Send h
+        Send "h"
     }
-    return
 }
 
 ; j = Down arrow (when space is held)
@@ -48,11 +45,10 @@ $j::
     global spacePressed, hjklPressed
     if (spacePressed) {
         hjklPressed := true
-        Send {Down}
+        Send "{Down}"
     } else {
-        Send j
+        Send "j"
     }
-    return
 }
 
 ; k = Up arrow (when space is held)
@@ -61,11 +57,10 @@ $k::
     global spacePressed, hjklPressed
     if (spacePressed) {
         hjklPressed := true
-        Send {Up}
+        Send "{Up}"
     } else {
-        Send k
+        Send "k"
     }
-    return
 }
 
 ; l = Right arrow (when space is held)
@@ -74,9 +69,8 @@ $l::
     global spacePressed, hjklPressed
     if (spacePressed) {
         hjklPressed := true
-        Send {Right}
+        Send "{Right}"
     } else {
-        Send l
+        Send "l"
     }
-    return
 }
