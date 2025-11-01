@@ -5,10 +5,12 @@ on:
     branches: [ main, master ]
     paths:
       - 'source-scripts/**'
+      - '.github/workflows/compile-scripts.yml'
   pull_request:
     branches: [ main, master ]
     paths:
       - 'source-scripts/**'
+      - '.github/workflows/compile-scripts.yml'
   workflow_dispatch:
 
 jobs:
