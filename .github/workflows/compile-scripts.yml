@@ -26,8 +26,14 @@ jobs:
           choco install autohotkey -y
 
           Write-Host "AutoHotkey installation complete!"
+          Write-Host "Adding AutoHotkey to PATH..."
+
+          $ahkPath = "C:\Program Files\AutoHotkey\Compiler"
+          $env:PATH = "$ahkPath;$env:PATH"
+          echo "$ahkPath" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
           Write-Host "Checking installation..."
-          Get-Command ahk2exe.exe -ErrorAction SilentlyContinue | Select-Object Source
+          Get-ChildItem -Path "C:\Program Files\AutoHotkey" -Recurse -Filter "ahk2exe.exe" | Select-Object FullName
 
       - name: Create output directory
         run: New-Item -ItemType Directory -Force -Path compiled-scripts
