@@ -21,19 +21,44 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install AutoHotkey and Compiler via Chocolatey
+      - name: Install AutoHotkey v2 via Chocolatey
         shell: pwsh
         run: |
-          Write-Host "Installing AutoHotkey v2 and compiler via Chocolatey..."
-          choco install autohotkey autohotkey-compiler -y
+          Write-Host "Installing AutoHotkey v2 via Chocolatey..."
+          choco install autohotkey.install -y
 
           Write-Host "Installation complete!"
+          Write-Host "Locating Ahk2Exe compiler..."
 
-          # Refresh environment variables to pick up PATH changes
-          $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+          # AutoHotkey v2 includes the compiler in the Compiler subdirectory
+          $compilerPath = "C:\Program Files\AutoHotkey\Compiler"
 
-          Write-Host "Verifying installation..."
-          Get-Command ahk2exe.exe -ErrorAction Stop | Format-List
+          if (Test-Path $compilerPath) {
+            Write-Host "Found compiler directory at: $compilerPath"
+
+            # Add compiler to PATH for subsequent steps
+            echo "$compilerPath" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+            # Also add to current session PATH
+            $env:Path = "$compilerPath;$env:Path"
+
+            # Verify ahk2exe.exe exists
+            $ahk2exe = Join-Path $compilerPath "Ahk2Exe.exe"
+            if (Test-Path $ahk2exe) {
+              Write-Host "Successfully found Ahk2Exe.exe at: $ahk2exe"
+              & $ahk2exe /help
+            } else {
+              Write-Error "Ahk2Exe.exe not found at expected location: $ahk2exe"
+              Write-Host "Contents of compiler directory:"
+              Get-ChildItem $compilerPath
+              exit 1
+            }
+          } else {
+            Write-Error "Compiler directory not found at: $compilerPath"
+            Write-Host "AutoHotkey installation contents:"
+            Get-ChildItem "C:\Program Files\AutoHotkey" -Recurse
+            exit 1
+          }
 
       - name: Create output directory
         run: New-Item -ItemType Directory -Force -Path compiled-scripts
