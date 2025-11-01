@@ -21,37 +21,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install AutoHotkey via Chocolatey
+      - name: Install AutoHotkey and Compiler via Chocolatey
         shell: pwsh
         run: |
-          Write-Host "Installing AutoHotkey v2 via Chocolatey..."
-          choco install autohotkey -y --install-arguments='"ADD_TO_PATH=yes"'
+          Write-Host "Installing AutoHotkey v2 and compiler via Chocolatey..."
+          choco install autohotkey autohotkey-compiler -y
 
-          Write-Host "AutoHotkey installation complete!"
+          Write-Host "Installation complete!"
 
           # Refresh environment variables to pick up PATH changes
           $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
 
-          Write-Host "Checking installation..."
-          $ahkInfo = choco list autohotkey --exact --local-only --limit-output
-          Write-Host "Installed: $ahkInfo"
-
-          # Find and verify ahk2exe.exe
-          $ahk2exe = Get-Command ahk2exe.exe -ErrorAction SilentlyContinue
-          if ($ahk2exe) {
-            Write-Host "Found ahk2exe.exe at: $($ahk2exe.Source)"
-          } else {
-            Write-Host "Searching for ahk2exe.exe..."
-            $found = Get-ChildItem -Path "C:\Program Files\AutoHotkey" -Recurse -Filter "ahk2exe.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
-            if ($found) {
-              Write-Host "Found at: $($found.FullName)"
-              $compilerDir = $found.Directory.FullName
-              echo "$compilerDir" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-            } else {
-              Write-Error "ahk2exe.exe not found!"
-              exit 1
-            }
-          }
+          Write-Host "Verifying installation..."
+          Get-Command ahk2exe.exe -ErrorAction Stop | Format-List
 
       - name: Create output directory
         run: New-Item -ItemType Directory -Force -Path compiled-scripts
