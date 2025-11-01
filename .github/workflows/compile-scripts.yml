@@ -25,17 +25,33 @@ jobs:
         shell: pwsh
         run: |
           Write-Host "Installing AutoHotkey v2 via Chocolatey..."
-          choco install autohotkey -y
+          choco install autohotkey -y --install-arguments='"ADD_TO_PATH=yes"'
 
           Write-Host "AutoHotkey installation complete!"
-          Write-Host "Adding AutoHotkey to PATH..."
 
-          $ahkPath = "C:\Program Files\AutoHotkey\Compiler"
-          $env:PATH = "$ahkPath;$env:PATH"
-          echo "$ahkPath" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          # Refresh environment variables to pick up PATH changes
+          $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
 
           Write-Host "Checking installation..."
-          Get-ChildItem -Path "C:\Program Files\AutoHotkey" -Recurse -Filter "ahk2exe.exe" | Select-Object FullName
+          $ahkInfo = choco list autohotkey --exact --local-only --limit-output
+          Write-Host "Installed: $ahkInfo"
+
+          # Find and verify ahk2exe.exe
+          $ahk2exe = Get-Command ahk2exe.exe -ErrorAction SilentlyContinue
+          if ($ahk2exe) {
+            Write-Host "Found ahk2exe.exe at: $($ahk2exe.Source)"
+          } else {
+            Write-Host "Searching for ahk2exe.exe..."
+            $found = Get-ChildItem -Path "C:\Program Files\AutoHotkey" -Recurse -Filter "ahk2exe.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+            if ($found) {
+              Write-Host "Found at: $($found.FullName)"
+              $compilerDir = $found.Directory.FullName
+              echo "$compilerDir" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+            } else {
+              Write-Error "ahk2exe.exe not found!"
+              exit 1
+            }
+          }
 
       - name: Create output directory
         run: New-Item -ItemType Directory -Force -Path compiled-scripts
