@@ -1,5 +1,5 @@
 ; Space-based navigation script
-; Hold Space to enable hjkl as arrow keys
+; Hold Space to enable hjkl as arrow keys (with modifier key support)
 ; Tap Space alone to type a space
 
 spacePressed := false
@@ -33,7 +33,15 @@ $h::
     global spacePressed, hjklPressed
     if (spacePressed) {
         hjklPressed := true
-        Send "{Left}"
+        ; Build the command with current modifier keys
+        mods := ""
+        if GetKeyState("Ctrl", "P")
+            mods .= "^"
+        if GetKeyState("Shift", "P")
+            mods .= "+"
+        if GetKeyState("Alt", "P")
+            mods .= "!"
+        Send mods "{Left}"
     } else {
         Send "h"
     }
@@ -45,7 +53,15 @@ $j::
     global spacePressed, hjklPressed
     if (spacePressed) {
         hjklPressed := true
-        Send "{Down}"
+        ; Build the command with current modifier keys
+        mods := ""
+        if GetKeyState("Ctrl", "P")
+            mods .= "^"
+        if GetKeyState("Shift", "P")
+            mods .= "+"
+        if GetKeyState("Alt", "P")
+            mods .= "!"
+        Send mods "{Down}"
     } else {
         Send "j"
     }
@@ -57,7 +73,15 @@ $k::
     global spacePressed, hjklPressed
     if (spacePressed) {
         hjklPressed := true
-        Send "{Up}"
+        ; Build the command with current modifier keys
+        mods := ""
+        if GetKeyState("Ctrl", "P")
+            mods .= "^"
+        if GetKeyState("Shift", "P")
+            mods .= "+"
+        if GetKeyState("Alt", "P")
+            mods .= "!"
+        Send mods "{Up}"
     } else {
         Send "k"
     }
@@ -69,7 +93,15 @@ $l::
     global spacePressed, hjklPressed
     if (spacePressed) {
         hjklPressed := true
-        Send "{Right}"
+        ; Build the command with current modifier keys
+        mods := ""
+        if GetKeyState("Ctrl", "P")
+            mods .= "^"
+        if GetKeyState("Shift", "P")
+            mods .= "+"
+        if GetKeyState("Alt", "P")
+            mods .= "!"
+        Send mods "{Right}"
     } else {
         Send "l"
     }
